@@ -1,14 +1,15 @@
 defmodule Servy.FileHandler do
-  def handle_file({:ok, content}, conv) do
-    %{conv | resp_body: content, status: 200}
+  alias Servy.Conv
+  def handle_file({:ok, content}, %Conv{} = conv) do
+    %Conv{conv | resp_body: content, status: 200}
   end
 
-  def handle_file({:error, :enoent}, conv) do
-    %{conv | resp_body: "File not found", status: 404}
+  def handle_file({:error, :enoent}, %Conv{} = conv) do
+    %Conv{conv | resp_body: "File not found", status: 404}
   end
 
-  def handle_file({:error, reason}, conv) do
-    %{conv | resp_body: "File error: #{reason}", status: 500}
+  def handle_file({:error, reason}, %Conv{} = conv) do
+    %Conv{conv | resp_body: "File error: #{reason}", status: 500}
   end
 
 end

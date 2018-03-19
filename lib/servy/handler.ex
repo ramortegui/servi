@@ -3,6 +3,8 @@ defmodule Servy.Handler do
   Handled HTTP request
   """
 
+  alias Servy.Conv
+
   @pages_path Path.expand("../../pages", __DIR__)
 
   import Servy.Plugins, only: [rewrite_path: 1, log: 1, track: 1, emojify: 1]
@@ -23,26 +25,26 @@ defmodule Servy.Handler do
     |> format_response
   end
 
-  def route(conv = %{method: "GET", path: "/wildthings"}) do
-    %{conv | resp_body: "Bears, Lions, Tigers", status: 200}
+  def route(conv = %Conv{method: "GET", path: "/wildthings"}) do
+    %Conv{conv | resp_body: "Bears, Lions, Tigers", status: 200}
   end
 
-  def route(conv = %{method: "GET", path: "/bears/new" <> id, resp_body: _}) do
+  def route(conv = %Conv{method: "GET", path: "/bears/new" <> id, resp_body: _}) do
     @pages_path
     |> Path.join("form.html")
     |> File.read
     |> handle_file(conv)
   end
 
-  def route(conv = %{method: "GET", path: "/bears/" <> id, resp_body: _}) do
+  def route(conv = %Conv{method: "GET", path: "/bears/" <> id, resp_body: _}) do
     %{conv | resp_body: "Bear #{id}", status: 200}
   end
 
-  def route(conv = %{method: "GET", path: "/bears", resp_body: _}) do
+  def route(conv = %Conv{method: "GET", path: "/bears", resp_body: _}) do
     %{conv | resp_body: "Yogy, Pands, Winnie", status: 200}
   end
 
-  def route(conv = %{ method: "DELETE", path: "/bears" }) do
+  def route(conv = %Conv{ method: "DELETE", path: "/bears" }) do
     %{conv | resp_body: "Bears must never be deleted", status: 403 } 
   end
 
@@ -53,36 +55,25 @@ defmodule Servy.Handler do
     |> handle_file(conv)
   end
 
-  def route(conv = %{ method: "GET", path: "/pages/" <> id}) do
+  def route(conv = %Conv{ method: "GET", path: "/pages/" <> id}) do
     Path.expand("../../pages", __DIR__)
     |> Path.join("#{id}.html")
     |> File.read
     |> handle_file(conv)
   end
 
-  def route(conv) do
+  def route(%Conv{} = conv) do
     %{conv | resp_body: " #{conv.path} Not found", status: 404}
   end
 
-  def format_response(conv) do
+  def format_response(%Conv{} = conv) do
     """
-    HTTP/1.1 #{conv.status} #{status_reason(conv.status)} 
+    HTTP/1.1 #{Conv.full_status(conv)} 
     Content-Type: text/html
     Content-Length: #{String.length(conv.resp_body)} 
 
     #{conv.resp_body} 
     """
-  end
-
-  defp status_reason(code) do
-    %{
-      200 => "OK",
-      201 => "Created",
-      401 => "Unauthorized",
-      403 => "Forbidden",
-      404 => "Not Found",
-      500 => "Interal Server Error"
-    }[code]
   end
 end
 
