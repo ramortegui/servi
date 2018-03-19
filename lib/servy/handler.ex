@@ -1,6 +1,15 @@
 defmodule Servy.Handler do
+  @moduledoc """
+  Handled HTTP request
+  """
+
+  @pages_path Path.expand("../../pages", __DIR__)
+
   require Logger
 
+  @doc """
+  Transforms the request into a response
+  """
   def handle(request) do
     request
     |> parse
@@ -32,6 +41,7 @@ defmodule Servy.Handler do
   
   def emojify(conv), do: conv
 
+  @doc "Logs 404 request"
   def track(conv = %{ status: 404, path: path }) do
     IO.puts "Warning: #{path} is on the loose!"
     conv
@@ -81,7 +91,7 @@ defmodule Servy.Handler do
   end
 
   def route(conv = %{method: "GET", path: "/bears/new" <> id, resp_body: _}) do
-    Path.expand("../../pages", __DIR__)
+    @pages_path
     |> Path.join("form.html")
     |> File.read
     |> handle_file(conv)
