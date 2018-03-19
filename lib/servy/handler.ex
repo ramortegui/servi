@@ -80,6 +80,13 @@ defmodule Servy.Handler do
     %{conv | resp_body: "Bears, Lions, Tigers", status: 200}
   end
 
+  def route(conv = %{method: "GET", path: "/bears/new" <> id, resp_body: _}) do
+    Path.expand("../../pages", __DIR__)
+    |> Path.join("form.html")
+    |> File.read
+    |> handle_file(conv)
+  end
+
   def route(conv = %{method: "GET", path: "/bears/" <> id, resp_body: _}) do
     %{conv | resp_body: "Bear #{id}", status: 200}
   end
@@ -88,14 +95,39 @@ defmodule Servy.Handler do
     %{conv | resp_body: "Yogy, Pands, Winnie", status: 200}
   end
 
-  def route(conv = %{ method: "DELETE", path: '/bears' }) do
+  def route(conv = %{ method: "DELETE", path: "/bears" }) do
     %{conv | resp_body: "Bears must never be deleted", status: 403 } 
+  end
+
+  def route(conv = %{ method: "GET", path: "/about"}) do
+    Path.expand("../../pages", __DIR__)
+    |> Path.join(".#{conv.path}.html")
+    |> File.read
+    |> handle_file(conv)
+  end
+
+  def route(conv = %{ method: "GET", path: "/pages/" <> id}) do
+    Path.expand("../../pages", __DIR__)
+    |> Path.join("#{id}.html")
+    |> File.read
+    |> handle_file(conv)
   end
 
   def route(conv) do
     %{conv | resp_body: " #{conv.path} Not found", status: 404}
   end
 
+  def handle_file({:ok, content}, conv) do
+    %{conv | resp_body: content, status: 200}
+  end
+
+  def handle_file({:error, :enoent}, conv) do
+    %{conv | resp_body: "File not found", status: 404}
+  end
+
+  def handle_file({:error, reason}, conv) do
+    %{conv | resp_body: "File error: #{reason}", status: 500}
+  end
 
   def format_response(conv) do
     """
@@ -182,6 +214,29 @@ IO.puts(response)
 
 request = """
 GET /bears?id=1 HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+response = Servy.Handler.handle(request)
+
+IO.puts(response)
+
+request = """
+GET /about HTTP/1.1
+Host: example.com
+User-Agent: ExampleBrowser/1.0
+Accept: */*
+
+"""
+response = Servy.Handler.handle(request)
+
+IO.puts(response)
+
+
+request = """
+GET /bears/new HTTP/1.1
 Host: example.com
 User-Agent: ExampleBrowser/1.0
 Accept: */*
