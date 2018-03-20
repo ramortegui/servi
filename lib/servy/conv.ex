@@ -1,6 +1,7 @@
 defmodule Servy.Conv do
   alias Servy.Conv
-  defstruct method: "", path: "", resp_body: "", status: nil 
+  defstruct method: "",
+  path: "", resp_body: "", status: nil , params: %{}
 
   def full_status(%Conv{} = conv) do
     "#{conv.status} #{status_reason(conv.status)}"
