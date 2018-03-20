@@ -29,7 +29,7 @@ defmodule Servy.Handler do
     %Conv{conv | resp_body: "Bears, Lions, Tigers", status: 200}
   end
 
-  def route(conv = %Conv{method: "GET", path: "/bears/new" <> id, resp_body: _}) do
+  def route(conv = %Conv{method: "GET", path: "/bears/new", resp_body: _}) do
     @pages_path
     |> Path.join("form.html")
     |> File.read
@@ -175,7 +175,6 @@ Accept: */*
 response = Servy.Handler.handle(request)
 
 IO.puts(response)
-
 
 
 request = """
