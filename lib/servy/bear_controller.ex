@@ -1,8 +1,7 @@
 defmodule Servy.BearController do
   alias Servy.Wildthings
   alias Servy.Bear
-
-  @templates_path Path.expand("../../templates", __DIR__)
+  import Servy.View, only: [render: 3]
   
   def index(conv) do
     bears = Wildthings.list_bears()
@@ -17,13 +16,6 @@ defmodule Servy.BearController do
     render(conv, "show.eex", bear: bear)
   end
 
-  defp render(conv, template, bindings \\ []) do
-    content = 
-      @templates_path
-      |> Path.join(template)
-      |> EEx.eval_file(bindings)
-      %{conv | resp_body: content, status: 200}
-  end
 
   def create(conv, %{"name" => name, "type" => type}) do
     %{ conv | status: 201, resp_body: "Create a bear named #{name} type #{type}" }
