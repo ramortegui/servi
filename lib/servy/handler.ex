@@ -5,6 +5,7 @@ defmodule Servy.Handler do
 
   alias Servy.Conv
   alias Servy.BearController
+  alias Servy.VideoCam
 
   @pages_path Path.expand("../../pages", __DIR__)
 
@@ -19,15 +20,42 @@ defmodule Servy.Handler do
     request
     |> parse
     |> rewrite_path
-    |> log
+    #  |> log
     |> route
     |> track
     |> put_content_length
     |> format_response
   end
 
+  def route( %Conv{ method: "GET", path: "/snapshots" } = conv) do
+    parent = self()
+
+    spawn(fn -> send(parent,{:result,  VideoCam.get_snapshot('cam1') }) end)
+    spawn(fn -> send(parent,{:result,  VideoCam.get_snapshot('cam2') }) end)
+    spawn(fn -> send(parent,{:result,  VideoCam.get_snapshot('cam3') }) end)
+
+    snapshot1 = receive do {:result, filename} -> filename end
+    snapshot2 = receive do {:result, filename} -> filename end
+    snapshot3 = receive do {:result, filename} -> filename end
+
+    snapshots = [snapshot1, snapshot2, snapshot3]
+
+    %{conv | status: 200, resp_body: inspect snapshots }
+  end
+
   def route(conv = %Conv{method: "GET", path: "/wildthings"}) do
     %Conv{conv | resp_body: "Bears, Lions, Tigers", status: 200}
+  end
+
+  def route(conv = %Conv{method: "GET", path: "/hibernate/" <> time}) do
+    time
+    |> String.to_integer
+    |> :timer.sleep
+    %Conv{conv | resp_body: "Awake!!!", status: 200}
+  end
+
+  def route(conv = %Conv{method: "GET", path: "/kaboom"}) do
+    raise "'KABOOM!!!"
   end
 
   def route(conv = %Conv{method: "GET", path: "/bears/new", resp_body: _}) do
