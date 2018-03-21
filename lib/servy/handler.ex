@@ -65,6 +65,15 @@ defmodule Servy.Handler do
     |> handle_file(conv)
   end
 
+  def route(conv = %Conv{ method: "GET", path: "/pages/faq" <> id}) do
+    Path.expand("../../pages", __DIR__)
+    |> Path.join("#{id}.md")
+    |> File.read
+    |> handle_file(conv)
+    |> parse_md
+
+  end
+
   def route(conv = %Conv{ method: "GET", path: "/pages/" <> id}) do
     Path.expand("../../pages", __DIR__)
     |> Path.join("#{id}.html")
@@ -89,6 +98,12 @@ defmodule Servy.Handler do
     #{conv.resp_body}
     """
   end
+
+  defp parse_md(%Conv{status: 200} = conv) do
+    %{ conv | resp_body: Earmark.as_html(conv.resp_body)}
+  end
+
+  defp parse_md(%Conv{} = conv), do: conv
 
   def put_content_length(%Conv{} = conv) do
     resp_headers = Map.put(conv.resp_headers, "Content-Length", String.length(conv.resp_body))
