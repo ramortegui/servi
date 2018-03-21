@@ -22,7 +22,6 @@ defmodule Servy.Handler do
     |> log
     |> route
     |> track
-    |> emojify
     |> format_response
   end
 
@@ -44,6 +43,10 @@ defmodule Servy.Handler do
 
   def route(conv = %Conv{method: "GET", path: "/bears", resp_body: _}) do
     BearController.index(conv)
+  end
+
+  def route(conv = %Conv{method: "GET", path: "/api/bears", resp_body: _}) do
+    Servy.Api.BearController.index(conv)
   end
 
   def route(conv = %Conv{ method: "DELETE", path: "/bears" }) do
@@ -75,7 +78,7 @@ defmodule Servy.Handler do
   def format_response(%Conv{} = conv) do
     """
     HTTP/1.1 #{Conv.full_status(conv)}\r
-    Content-Type: text/html\r
+    Content-Type: #{conv.resp_content_type}\r
     Content-Length: #{String.length(conv.resp_body)}\r
     \r
     #{conv.resp_body}
