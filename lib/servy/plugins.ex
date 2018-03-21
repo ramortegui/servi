@@ -5,16 +5,20 @@ defmodule Servy.Plugins do
 
   @doc "Logs 404 request"
   def track(conv = %{ status: 404, path: path }) do
-    IO.puts "Warning: #{path} is on the loose!"
+    if Mix.env != :test do
+      IO.puts "Warning: #{path} is on the loose!"
+    end
     conv
   end
 
   def track(%Conv{} = conv), do: conv
 
   def log(%Conv{} = conv) do
-    Logger.debug( 
-      fn() -> "Solving #{conv.path} status #{conv.status}" end
-    )
+    if Mix.env == :dev do
+      Logger.debug( 
+        fn() -> "Solving #{conv.path} status #{conv.status}" end
+      )
+    end
     conv
   end
 
@@ -36,17 +40,7 @@ defmodule Servy.Plugins do
   
   def emojify(conv = %Conv{ status: 200, resp_body: resp_body }) do
     emoji = """
-                   ∩
-    　⚡️　　　　　＼＼
-    　　　　　　　／　 ）
-    ⊂＼＿／￣￣￣　 ／
-    　＼＿／   ° ͜ʖ ° （
-    　　　）　　 　／⌒＼
-    　　／　 ＿＿＿／⌒＼⊃
-    　（　 ／
-    　　＼＼
-          U
-
+    ⚡️
     """
     %Conv{ conv | resp_body:  emoji <> resp_body}
   end
