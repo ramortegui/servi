@@ -28,7 +28,6 @@ defmodule Servy.HttpServer do
 
   def read_request(client_socket) do
     {:ok, request} = :gen_tcp.recv(client_socket, 0)
-    IO.puts request
     request
   end
 
@@ -44,9 +43,6 @@ defmodule Servy.HttpServer do
 
   def write_response(response, client_socket) do
     :ok = :gen_tcp.send(client_socket, response)
-
-    IO.puts "Send response:\n"
-    IO.puts response
     response
   end
 
