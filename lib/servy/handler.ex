@@ -2,11 +2,11 @@ defmodule Servy.Handler do
   @moduledoc """
   Handled HTTP request
   """
+  import Servy.View, only: [render: 3]
 
   alias Servy.Conv
   alias Servy.BearController
   alias Servy.VideoCam
-  alias Servy.Fetcher
 
   @pages_path Path.expand("../../pages", __DIR__)
 
@@ -29,19 +29,14 @@ defmodule Servy.Handler do
   end
 
   def route( %Conv{ method: "GET", path: "/sensors" } = conv) do
-    pid1 = Fetcher.async(fn -> VideoCam.get_snapshot("cam-1") end)
-    pid2 = Fetcher.async(fn -> VideoCam.get_snapshot("cam-1") end)
-    pid3 = Fetcher.async(fn -> VideoCam.get_snapshot("cam-1") end)
-    pid4 = Fetcher.async(fn -> Servy.Tracker.get_location("bigfoot") end)
+    task = Task.async(fn -> Servy.Tracker.get_location("bigfoot") end)
+    where_is_bigfoot = Task.await(task)
+    snapshots = 
+      ["cam1","cam2", "cam3"]
+      |> Enum.map(&Task.async(fn -> VideoCam.get_snapshot(&1) end))
+      |> Enum.map(&Task.await/1)
 
-    snapshot1 = Fetcher.get_result(pid1) 
-    snapshot2 = Fetcher.get_result(pid2)
-    snapshot3 = Fetcher.get_result(pid3)
-    where_is_bigfoot = Fetcher.get_result(pid4)
-
-    snapshots = [snapshot1, snapshot2, inspect { snapshot3, where_is_bigfoot }]
-
-    %{conv | status: 200, resp_body: inspect snapshots }
+    render(conv, "sensors.eex", [ snapshots: snapshots, location: where_is_bigfoot] )
   end
 
   def route(conv = %Conv{method: "GET", path: "/wildthings"}) do
@@ -135,6 +130,7 @@ defmodule Servy.Handler do
   defp parse_md(%Conv{} = conv), do: conv
 
   def put_content_length(%Conv{} = conv) do
+    
     resp_headers = Map.put(conv.resp_headers, "Content-Length", String.length(conv.resp_body))
     %{ conv | resp_headers: resp_headers }
   end
