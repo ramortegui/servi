@@ -11,15 +11,16 @@ defmodule HandlerTest do
     Accept: */*\r
     \r
     """
+
     response = handle(request)
 
     assert response == """
-    HTTP/1.1 200 OK\r
-    Content-Type: text/html\r
-    Content-Length: 20\r
-    \r
-    Bears, Lions, Tigers
-    """
+           HTTP/1.1 200 OK\r
+           Content-Type: text/html\r
+           Content-Length: 20\r
+           \r
+           Bears, Lions, Tigers
+           """
   end
 
   test "GET /api/bears" do
@@ -54,28 +55,27 @@ defmodule HandlerTest do
   end
 
   test "POST /api/bears" do
-      request = """
-      POST /api/bears HTTP/1.1\r
-      Host: example.com\r
-      User-Agent: ExampleBrowser/1.0\r
-      Accept: */*\r
-      Content-Type: application/json\r
-      Content-Length: 21\r
-      \r
-      {"name": "Breezly", "type": "Polar"}
-      """
+    request = """
+    POST /api/bears HTTP/1.1\r
+    Host: example.com\r
+    User-Agent: ExampleBrowser/1.0\r
+    Accept: */*\r
+    Content-Type: application/json\r
+    Content-Length: 21\r
+    \r
+    {"name": "Breezly", "type": "Polar"}
+    """
 
-      response = handle(request)
+    response = handle(request)
 
-      assert response == """
-      HTTP/1.1 201 Created\r
-      Content-Type: text/html\r
-      Content-Length: 35\r
-      \r
-      Created a Polar bear named Breezly!
-      """
+    assert response == """
+           HTTP/1.1 201 Created\r
+           Content-Type: text/html\r
+           Content-Length: 35\r
+           \r
+           Created a Polar bear named Breezly!
+           """
   end
-
 
   defp remove_whitespace(text) do
     String.replace(text, ~r{\s}, "")

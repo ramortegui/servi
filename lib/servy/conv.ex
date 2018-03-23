@@ -1,16 +1,17 @@
 defmodule Servy.Conv do
   alias Servy.Conv
+
   defstruct method: "",
-  path: "",
-  resp_body: "",
-  status: nil,
-  params: %{},
-  headers: %{},
-  resp_headers: %{ "Content-Type" => "text/html" }
+            path: "",
+            resp_body: "",
+            status: nil,
+            params: %{},
+            headers: %{},
+            resp_headers: %{"Content-Type" => "text/html"}
 
   def full_status(%Conv{} = conv) do
     "#{conv.status} #{status_reason(conv.status)}"
-    end
+  end
 
   defp status_reason(code) do
     %{

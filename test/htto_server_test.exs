@@ -8,8 +8,11 @@ defmodule HttpServerTest do
 
     parent = self
 
-    Enum.each(1..5,fn(n) -> spawn(fn -> send(parent,HTTPoison.get "http://localhost:4000/wildthings") end) end)
-    Enum.each(1..5,fn(n) ->
+    Enum.each(1..5, fn n ->
+      spawn(fn -> send(parent, HTTPoison.get("http://localhost:4000/wildthings")) end)
+    end)
+
+    Enum.each(1..5, fn n ->
       receive do
         {:ok, response} ->
           assert response.status_code == 200

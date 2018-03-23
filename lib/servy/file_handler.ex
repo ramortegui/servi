@@ -1,5 +1,6 @@
 defmodule Servy.FileHandler do
   alias Servy.Conv
+
   def handle_file({:ok, content}, %Conv{} = conv) do
     %Conv{conv | resp_body: content, status: 200}
   end
@@ -11,5 +12,4 @@ defmodule Servy.FileHandler do
   def handle_file({:error, reason}, %Conv{} = conv) do
     %Conv{conv | resp_body: "File error: #{reason}", status: 500}
   end
-
 end

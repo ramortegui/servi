@@ -1,12 +1,12 @@
 defmodule Servy.PledgeController do
-  def create(conv, %{ "name" => name, "amount" => amount}) do
+  def create(conv, %{"name" => name, "amount" => amount}) do
     Servy.PledgeServer.create_pledge(name, String.to_integer(amount))
-    %{conv | status: 200, resp_body: "#{name} pledge #{amount}!" }
+    %{conv | status: 200, resp_body: "#{name} pledge #{amount}!"}
   end
 
   def index(conv) do
     pledges = Servy.PledgeServer.recent_pledges()
 
-    %{conv | status: 200, resp_body: (inspect pledges) }
+    %{conv | status: 200, resp_body: inspect(pledges)}
   end
 end
