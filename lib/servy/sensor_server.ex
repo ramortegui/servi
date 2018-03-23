@@ -19,7 +19,7 @@ defmodule Servy.SensorServer do
   end
 
   def set_refresh_interval(time) do
-    Process.send(@name, {:set_refresh_interval, time}, [])
+    GenServer.cast(@name, {:set_refresh_interval, time})
   end
 
   def init(_state) do
@@ -29,32 +29,27 @@ defmodule Servy.SensorServer do
     {:ok, state}
   end
 
-  def handle_info(:refresh, _state) do
-    IO.puts("Refreshing the cache...")
-    new_state = %State{sensor_data: run_tasks_to_get_sensor_data()}
-    schedule_refresh(new_state.refresh_interval)
-    {:noreply, new_state}
-  end
-
-  def handle_info({:set_refresh_interval, time}, state) do
-    IO.puts("Refreshing now to #{time}")
-    state = %{state | refresh_interval: time}
+  def handle_cast({:set_refresh_interval, time}, state) do
+    new_state = %{state | refresh_interval: time}
     schedule_refresh(time)
-    IO.puts("Refreshing now to #{inspect(state)}")
-    {:noreply, state}
+    {:noreply, new_state}
   end
 
   def handle_call(:get_sensor_data, _from, state) do
     {:reply, state, state}
   end
 
+  def handle_info(:refresh, state) do
+    new_state = %{state | sensor_data: run_tasks_to_get_sensor_data()}
+    schedule_refresh(new_state.refresh_interval)
+    {:noreply, new_state}
+  end
+
   defp schedule_refresh(refresh_interval) do
-    Process.send_after(self, :refresh, refresh_interval)
+    Process.send_after(self(), :refresh, refresh_interval)
   end
 
   defp run_tasks_to_get_sensor_data do
-    IO.puts("Running tasks to ge sensor data...")
-
     task = Task.async(fn -> Servy.Tracker.get_location("bigfoot") end)
 
     snapshots =
