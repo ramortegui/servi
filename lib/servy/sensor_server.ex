@@ -11,8 +11,9 @@ defmodule Servy.SensorServer do
   end
 
   def start_link(interval) do
-    IO.puts "Strating the sensor server.. with#{interval}"
-    GenServer.start_link(__MODULE__, %{}, name: @name)
+    IO.puts "Strating the sensor server.. with #{interval}"
+    initial_state = %State{ refresh_interval: interval}
+    GenServer.start_link(__MODULE__, initial_state, name: @name)
   end
 
   def get_sensor_data do
@@ -23,9 +24,9 @@ defmodule Servy.SensorServer do
     GenServer.cast(@name, {:set_refresh_interval, time})
   end
 
-  def init(_state) do
+  def init(state) do
     initial_state = run_tasks_to_get_sensor_data()
-    state = %State{sensor_data: initial_state}
+    state = %State{state | sensor_data: initial_state}
     schedule_refresh(state.refresh_interval)
     {:ok, state}
   end
