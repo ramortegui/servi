@@ -9,7 +9,7 @@ defmodule Servy.ServicesSupervisor do
   def init(:ok) do
     children = [
       Servy.PledgeServer,
-      {Servy.SensorServer, 10}
+      {Servy.SensorServer,:timer.minutes(60)}
     ]
     Supervisor.init(children, strategy: :one_for_one)
   end
