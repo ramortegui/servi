@@ -6,9 +6,9 @@ defmodule Servy.PledgeServer do
     defstruct cache_size: 3, pledges: []
   end
 
-  def start do
+  def start_link(_arg) do
     IO.puts("Starting the Generic server...")
-    GenServer.start(__MODULE__, %State{}, name: @name)
+    GenServer.start_link(__MODULE__, %State{}, name: @name)
   end
 
   def init(state) do

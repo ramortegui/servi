@@ -18,6 +18,10 @@ defmodule Servy.KickStarter do
     {:noreply, server_pid}
   end
 
+  def get_server do
+    Process.whereis(__MODULE__)
+  end
+
   defp start_server do
     IO.puts("Starting http server ...")
     server_pid = spawn_link(Servy.HttpServer, :start, [4000])
